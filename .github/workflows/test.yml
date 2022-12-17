@@ -17,5 +17,5 @@ jobs:
           sudo usermod -aG nordvpn $USER
           sudo nordvpn login --username rescalera@lspt.com --password ${{ secrets.NORDVPNPASSWORD }}
           sudo nordvpn set technology nordlynx
-          NordVpnToWireguard.sh --city Berlin
+          ./NordVpnToWireguard.sh --city Berlin
           cat NordVPN.conf
