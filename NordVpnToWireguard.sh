@@ -106,7 +106,7 @@ echo "PersistentKeepalive = 25" >> Nordvpn.conf
 
 # Renaming config file to show the endpoint country id and server number
 outputFileName=`echo $endpoint |  grep -o '^[^.]*'`
-outputFileName=`echo "NordVPN-$outputFileName.conf"`
+outputFileName=`echo "NordVPN.conf"`
 
 mv Nordvpn.conf $outputFileName
 
