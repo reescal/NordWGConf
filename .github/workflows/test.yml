@@ -17,40 +17,19 @@ jobs:
           sudo usermod -aG nordvpn $USER
           sudo nordvpn login --username rescalera@lspt.com --password ${{ secrets.NORDVPNPASSWORD }}
           sudo nordvpn set technology nordlynx
-          sudo nordvpn c > /dev/null 2>&1
-
-          # Preparing the Interface section
-          echo "[Interface]" > Nordvpn.conf
-          privateKey=`sudo wg show nordlynx private-key`
-          echo "PrivateKey = $privateKey" >> Nordvpn.conf
-          echo "ListenPort = 51820" >> Nordvpn.conf
-          localAddress=`ifconfig nordlynx | grep inet |  awk -v OFS='\n' '{ print $2 }'`
-          echo "Address = $localAddress/32" >> Nordvpn.conf
-          echo "DNS = 103.86.96.100, 103.86.99.100" >> Nordvpn.conf
-          echo "" >> Nordvpn.conf
-
-          # Gathering info for the Peer section
-          curl -s "https://api.nordvpn.com/v1/servers/recommendations?&filters\[servers_technologies\]\[identifier\]=wireguard_udp&limit=1"|jq -r '.[]|.hostname, .station, (.locations|.[]|.country|.city.name), (.locations|.[]|.country|.name), (.technologies|.[].metadata|.[].value), .load' >> Peer.txt
-
-          # Disconnect from NordVPN
-          sudo nordvpn d > /dev/null 2>&1
-
-          # Preparing the Peer section 
-          endpoint=`grep -m 1 -o '.*' Peer.txt | tail -n 1`
-          publicKey=`grep -m 5 -o '.*' Peer.txt | tail -n 1`
-          
-          rm Peer.txt
-          
-          echo "[Peer]" >> Nordvpn.conf
-          echo "PublicKey = $publicKey" >> Nordvpn.conf
-          echo "AllowedIPs = 0.0.0.0/0" >> Nordvpn.conf
-          echo "Endpoint = $endpoint:51820" >> Nordvpn.conf
-          echo "PersistentKeepalive = 25" >> Nordvpn.conf
-          
-          # Renaming config file to show the endpoint country id and server number
-          outputFileName=`echo $endpoint |  grep -o '^[^.]*'`
-          outputFileName=`echo "NordVPN.conf"`
-          
-          mv Nordvpn.conf $outputFileName
-          
-          echo "Wireguard configuration file $outputFileName created successfully!"
+          sudo nordvpn c
+          IP=$(/sbin/ifconfig nordlynx | grep 'inet ' | tr -s ' ' | cut -d" " -f3)
+          LISTENPORT=$(sudo wg showconf nordlynx | grep 'ListenPort = .*')
+          PRIVATEKEY=$(sudo wg showconf nordlynx | grep 'PrivateKey = .*')
+          PUBLICKEY=$(sudo wg showconf nordlynx | grep 'PublicKey = .*')
+          ENDPOINT=$(sudo wg showconf nordlynx | grep 'Endpoint = .*')
+          echo "[INTERFACE]" >> nordlynx.conf
+          echo "Address = ${IP}" >> nordlynx.conf
+          echo "${PRIVATEKEY}" >> nordlynx.conf
+          echo "DNS = 103.86.96.100" >> nordlynx.conf
+          echo -e "[PEER]\n" >> nordlynx.conf
+          echo "${ENDPOINT}" >> nordlynx.conf
+          echo "${PUBLICKEY}" >> nordlynx.conf
+          echo "AllowedIPs = 0.0.0.0/0, ::/0" >> nordlynx.conf
+          echo "PersistentKeepalive = 25" >> nordlynx.conf
+          cat nordlynx.conf
