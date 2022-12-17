@@ -68,7 +68,7 @@ else
 fi
 
 # Connect to NordVPN
-nordvpn c $COUNTRY $CITY > /dev/null 2>&1
+sudo nordvpn c $COUNTRY $CITY > /dev/null 2>&1
 
 if [ $? -ne 0 ]
 then
@@ -90,7 +90,7 @@ echo "" >> Nordvpn.conf
 curl -s "https://api.nordvpn.com/v1/servers/recommendations?&filters\[servers_technologies\]\[identifier\]=wireguard_udp&limit=1"|jq -r '.[]|.hostname, .station, (.locations|.[]|.country|.city.name), (.locations|.[]|.country|.name), (.technologies|.[].metadata|.[].value), .load' >> Peer.txt
 
 # Disconnect from NordVPN
-nordvpn d > /dev/null 2>&1
+sudo nordvpn d > /dev/null 2>&1
 
 # Preparing the Peer section 
 endpoint=`grep -m 1 -o '.*' Peer.txt | tail -n 1`
