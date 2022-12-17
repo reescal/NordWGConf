@@ -15,7 +15,7 @@ jobs:
         run: |
           sh <(curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh)
           sudo usermod -aG nordvpn $USER
-          nordvpn login --username rescalera@lspt.com --password ${{ secrets.NORDVPNPASSWORD }}
-          nordvpn set technology nordlynx
+          sudo nordvpn login --username rescalera@lspt.com --password ${{ secrets.NORDVPNPASSWORD }}
+          sudo nordvpn set technology nordlynx
           ./NordVpnToWireguard.sh --city Berlin
           cat NordVPN.conf
